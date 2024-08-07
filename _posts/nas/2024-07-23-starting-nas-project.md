@@ -37,7 +37,7 @@ I had a few key requirements in mind for the NAS:
 | [**Passmark Score**](https://www.cpubenchmark.net/compare/769vs5213vs5117/Intel-i5-661-vs-Intel-i3-N305-vs-AMD-Ryzen-Embedded-R1600) | 2469     | 10055                     | 3365 |
 | **Installed Memory**    | 16 GB         | 32 GB                     | 4 GB (max 32 GB 2x16 GB) |
 
-I'd been considering the [Synology DiskStation DS923+](), but the Terramaster seemed like a more powerful option on paper – even though it was a brand I wasn't familiar with. A little research later, and I decided to take the leap! 
+I'd been considering the Synology DiskStation DS923+, but the Terramaster seemed like a more powerful option on paper – even though it was a brand I wasn't familiar with. A little research later, and I decided to take the leap! 
 
 However, I did uncover conflicting information during my research: while Terramaster advertises the F4-424 Pro with 32 GB of memory, Intel's [specifications](https://www.intel.com/content/www/us/en/products/sku/231805/intel-core-i3n305-processor-6m-cache-up-to-3-80-ghz/specifications.html) for the i3-N305 processor officially support a maximum of 16 GB. This raises questions about the actual memory configuration and potential limitations.
 
