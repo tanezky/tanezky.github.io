@@ -41,9 +41,9 @@ _Frontside of the fan_
 ![Fan from back](/assets/img/posts/disassembly-of-terramaster-f4-424-pro/disassembly05.jpg){: width="2602" height="1848" .w-75 .center}
 _Backside of the fan_
 
-The TerraMaster F4-424 Pro is cooled by a 120 x 120 x 25 mm seven-blade fan manufactured by Shenzhen Yongyihao Electronics Co. Ltd., better known for their SnowFAN brand. The fan operates between 8-13.5 VDC, consumes 3.84 Watts, and can reach a maximum speed of 3000 RPM, according to the [datasheet](/assets/files/datasheets/snowfan-1-2106260UQ9326.pdf). The manufacturer [claims](https://www.snowfan.hk/dc_axial_fan/107.html) a lifespan of up to 70,000 hours, potentially translating to eight years of continuous operation.
+The TerraMaster F4-424 Pro is cooled by a 120 x 120 x 25 mm seven-blade fan manufactured by Shenzhen Yongyihao Electronics Co. Ltd., better known for their SnowFAN brand. According to the [datasheet](/assets/files/datasheets/snowfan-1-2106260UQ9326.pdf), this fan operates between 8-13.5 VDC, consumes 3.84 Watts, and has a maximum speed of 3000 RPM, generating an impressive airflow of 112.2 CFM (cubic feet per minute) or 190.63 m³/h. This is significantly more powerful than typical PC chassis fans, which usually have about half the airflow. The reported noise level is 44.5 dBA, comparable to the ambient noise of normal living, such as conversation or a radio playing in the background. The manufacturer [claims](https://www.snowfan.hk/dc_axial_fan/107.html) a lifespan of up to 70,000 hours, potentially translating to eight years of continuous operation.
 
-While these specifications are promising, real-world performance and longevity under continuous load remain to be seen. Fortunately, [Techpowerup](https://www.techpowerup.com/review/terramaster-d8-hybrid/9.html) has conducted a review with noise level measurements on this same fan model, which can give some insights into its expected performance.
+While these specifications sound promising, real-world performance and longevity under continuous load remain to be seen. Fortunately, [Techpowerup's](https://www.techpowerup.com/review/terramaster-d8-hybrid/9.html) review includes noise level measurements for this specific fan model, providing valuable insights into its expected performance.
 
 
 ## SATA Expansion Board
