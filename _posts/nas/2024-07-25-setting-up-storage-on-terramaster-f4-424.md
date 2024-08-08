@@ -99,7 +99,7 @@ _HDDs installed_
 ![HHD in bay 4](/assets/img/posts/storage-setup-terramaster-f4-424-pro/storage08.jpg){: width="2387" height="1848" .w-75 .center}
 _HDD installed in bay 4_
 
-The proximity of the hard drive in bay 4 to the CPU heatsink raises concerns about potential heat buildup. The ventilation holes underneath the enclosure might not provide sufficient airflow, and the 25mm thick fan at the back might not adequately cool the heatsink, especially under heavy load. A thinner 15mm fan could potentially improve airflow and cooling in this area. The effectiveness of the current cooling solution and the potential for overheating will require monitoring during operation, particularly under heavy workloads.
+The proximity of the hard drive in bay 4 to the CPU heatsink raises concerns about potential heat buildup. The ventilation holes underneath the enclosure might not provide sufficient airflow, and the 25mm thick fan at the back might not adequately cool the heatsink, especially under heavy load. A thinner 15mm fan could potentially improve airflow and cooling in this area but it is unlikely to find any slimmer models with equivalent airflow specifications. The effectiveness of the current cooling solution and the potential for overheating will require monitoring during operation, particularly under heavy workloads.
 
 ![25mm fan in back](/assets/img/posts/storage-setup-terramaster-f4-424-pro/storage09.jpg){: width="3062" height="1527" .w-75 .center}
 _25mm fan in back_
