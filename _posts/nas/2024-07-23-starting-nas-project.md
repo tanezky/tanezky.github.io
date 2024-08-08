@@ -36,6 +36,7 @@ I had a few key requirements in mind for the NAS:
 | **TDP**       | 87 W          | 15 W                      | 25 W |
 | [**Passmark Score**](https://www.cpubenchmark.net/compare/769vs5213vs5117/Intel-i5-661-vs-Intel-i3-N305-vs-AMD-Ryzen-Embedded-R1600) | 2469     | 10055                     | 3365 |
 | **Installed Memory**    | 16 GB         | 32 GB                     | 4 GB (max 32 GB 2x16 GB) |
+| **Ethernet**    | 1 x 1GBASE-T <br>(upgradable via X1 PCIe)  | 2 x 2.5GBASE-T      | 2 x 1GBASE-T<br>(upgradable via proprietary 2X PCIe) | 
 
 I'd been considering the Synology DiskStation DS923+, but the Terramaster seemed like a more powerful option on paper – even though it was a brand I wasn't familiar with. A little research later, and I decided to take the leap! 
 
