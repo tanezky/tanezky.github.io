@@ -4,7 +4,7 @@ author: tanezky
 date: 2024-07-23 17:00:00 +/-TTTT
 description: Beginning of NAS Project
 categories: [NAS]
-tags: [nas]
+tags: [NAS]
 image: /assets/img/posts/project_post.jpg
 ---
 
@@ -22,7 +22,7 @@ I had a few key requirements in mind for the NAS:
 - **Redundancy** Disk failure protection (software zRAID)
 - **Power Consumption** Good power efficiency to reduce energy usage and lower my electricity bill.
 - **Security** Support for FTPM (Firmware Trusted Platform Module) to ensure secure boot and protect against unauthorized firmware modifications.
-**Size** A compact form factor, smaller than ATX.
+- **Size** A compact form factor, smaller than ATX.
 - **Ethernet** At least 2.5 Gbs
 
 ## CPU Comparison

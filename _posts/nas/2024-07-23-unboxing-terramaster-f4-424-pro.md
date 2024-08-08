@@ -4,7 +4,7 @@ author: tanezky
 date: 2024-07-23 18:00:00 +/-TTTT
 description: First impressions on Terramaster F4-424 Pro NAS device
 categories: [NAS]
-tags: [nas,terramaster, F4-424 Pro]
+tags: [NAS,Terramaster, F4-424 Pro]
 image: /assets/img/posts/unboxing-terramaster-f4-424-pro/unbox_post.jpg
 ---
 
@@ -33,7 +33,7 @@ _Power supply unit_
 
 The included power supply unit has an output of 12 VDC and 7.5 A, delivering a maximum of 90 Watts of power.
 
-## The Case
+## Chassis
 
 ![Case1](/assets/img/posts/unboxing-terramaster-f4-424-pro/case1.jpg){: width="2399" height="1740" .w-75 .center}
 _Frontside of the chassis_
@@ -75,7 +75,7 @@ Two NVMe slots are located internally, requiring removal of two screws and the s
 
 ## Conclusion
 
-Overall, the TerraMaster F4-424 Pro feels solidly built, with rubber feet and a weight of 3.4 kilograms (diskless) that should help minimize vibrations – a plus for hard drive longevity. However, the 12 mm fan at the back raises a few concerns about placement. It blows air directly out the rear, meaning the device can't be placed too close to a wall or in a shallow shelf. 
+Overall, the TerraMaster F4-424 Pro feels solidly built, with rubber feet and a weight of 3.4 kilograms (diskless) that should help minimize vibrations – a plus for hard drive longevity. However, the 120 mm fan at the back raises a few concerns about placement. It blows air directly out the rear, meaning the device can't be placed too close to a wall or in a shallow shelf. 
 
 The discrepancy between advertised and officially supported memory capacity also gives pause, and I'll be looking closely at actual performance later. But on first glance, this NAS seems like a promising contender for my homelab upgrade.
 
