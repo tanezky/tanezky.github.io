@@ -37,7 +37,7 @@ I'm slightly skeptical about these measurements, as the UEFI seems to be interac
 ## Secure Boot Vulnerability
 ![Compromised PK key](/assets/img/posts/terramaster-uefi/uefi03.jpg){: width="1920" height="1080" .w-75 .center}
 _Compromised PK key_
-A recent discovery by Binarly revealed a widespread vulnerability affecting numerous manufacturers, including TerraMaster. They did not replace the default AMI test platform key on their devices, allowing malicious actors to potentially bypass Secure Boot entirely.
+A recent discovery by Binarly revealed a widespread [vulnerability](https://arstechnica.com/security/2024/07/secure-boot-is-completely-compromised-on-200-models-from-5-big-device-makers/) affecting numerous manufacturers, including TerraMaster. They did not replace the default AMI test platform key on their devices, allowing malicious actors to potentially bypass Secure Boot entirely.
 
 Upon inspecting the platform key (PK) certificate on my F4-424 Pro, I found that the PK certificate legend matches the GUID of the leaked keys. This confirms the vulnerability's presence.
 
