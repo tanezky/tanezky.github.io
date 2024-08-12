@@ -45,6 +45,8 @@ The TerraMaster F4-424 Pro is cooled by a 120 x 120 x 25 mm seven-blade fan manu
 
 While these specifications sound promising, real-world performance and longevity under continuous load remain to be seen. Fortunately, [Techpowerup's](https://www.techpowerup.com/review/terramaster-d8-hybrid/9.html) review includes noise level measurements for this specific fan model, providing valuable insights into its expected performance.
 
+> More about the fan in article [Terramaster F4-424 Pro UEFI](https://tanezky.github.io/posts/terramaster-uefi/)
+{: .prompt-tip }
 
 ## SATA Expansion Board
 ![Expansion board from front](/assets/img/posts/disassembly-of-terramaster-f4-424-pro/disassembly06.jpg){: width="3861" height="1774" .w-75 .center}
