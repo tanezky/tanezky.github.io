@@ -367,7 +367,8 @@ $ iperf3 -c 10.42.42.150 -u -b 1000M -P 10 -R
 [SUM]   0.00-10.00  sec  1.11 GBytes   957 Mbits/sec  0.000 ms  0/0 (0%)  sender
 [SUM]   0.00-10.00  sec  1.11 GBytes   956 Mbits/sec  0.046 ms  0/825618 (0%)  receiver
 ```
-
+## Power Consumption
+At idle, the device consumed approximately 34 Watts. During file transfers the power consumption increased to 43 Watts.
 
 ## Conclusion
 unRAID proved to be remarkably user-friendly for setting up ZFS pools and creating shares. It's easy to see why it's so widely recommended, and the extensive collection of community-provided applications is a major plus.
