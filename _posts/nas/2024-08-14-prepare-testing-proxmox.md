@@ -2,7 +2,7 @@
 title: Proxmox VE 8.2.4
 author: tanezky
 date: 2024-08-14 20:00:00 +/-TTTT
-description: Prepare to test Proxmox Virtual Environment
+description: Preparations to test Proxmox Virtual Environment
 categories: [NAS]
 tags: [NAS,Terramaster,F4-424 Pro, Proxmox]
 image: /assets/img/posts/pve-preparation/pve-prep-post.jpg

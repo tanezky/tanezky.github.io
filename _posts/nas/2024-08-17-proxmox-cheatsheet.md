@@ -4,7 +4,7 @@ author: tanezky
 date: 2024-08-17 21:00:00 +/-TTTT
 description: Nice-to-know commands to manage Proxmox
 categories: [NAS]
-tags: [NAS,Terramaster,F4-424 Pro, Proxmox]
+tags: [NAS,Terramaster,F4-424 Pro, Proxmox, Cheatsheet]
 image: /assets/img/posts/pve/pve-cheatsheet-post.jpg
 ---
 
