@@ -81,6 +81,38 @@ echo 1 > /sys/bus/pci/devices/0000\:03\:00.0/remove
 echo 1 > /sys/bus/pci/rescan
 ```
 
+### LUKS
+#### Create Vault
+```shell
+# Create an empty file for encrypted container (512 MB)
+dd if=/dev/urandom of=filevault.img bs=1M count=512
+
+# Create LUKS volume within the empty file
+cryptsetup --verify-passphrase luksFormat filevault.img
+
+# Open the LUKS volume
+cryptsetup open --type luks filevault.img keyvault
+
+# Create filesystem labeled as keyvault
+mkfs.ext4 -L keyvault /dev/mapper/keyvault
+
+# Mount
+mount /dev/mapper/keyvault /media/keyvault
+```
+
+#### Controlling LUKS Vault
+```shell
+# Open
+cryptsetup open --type luks vaultfile preferred-name
+
+# Location of opened vaults
+/dev/mapper
+
+# Close, unmount before closing
+umount /media/mountpoint
+cryptsetup close preferred-name
+```
+
 
 ### Other Sources
 - General
@@ -96,5 +128,8 @@ echo 1 > /sys/bus/pci/rescan
     - [PCI Passthrough](https://pve.proxmox.com/wiki/PCI_Passthrough)
     - [Blog: IOMMU Groups, inside and out](https://vfio.blogspot.com/2014/08/iommu-groups-inside-and-out.html)
     - [PCI passthrough via OVMF](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF)
+
+
+
 
 
