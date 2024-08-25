@@ -9,7 +9,7 @@ image: /assets/img/posts/terramaster-uefi/terramaster-uefi-post.jpg
 ---
 ![PC health tab](/assets/img/posts/terramaster-uefi/uefi01_1.jpg){: width="1920" height="1080" .w-75 .center}
 _UEFI Main tab_
-The firmware is based on AMI (American Megatrends International) Aptio, and the version for the F4-424 is MADN0101.V04. It offers a wide array of configuration options, but for my purposes, the most interesting features are support for fTPM (Firmware Trusted Platform Module) and the ability to roll in my own secure boot keys. While UEFI itself isn't a bootloader, this version can be configured to execute specific UEFI applications (Enroll Efi Image), potentially allowing the use of UKI (Unified Kernel Image) and bypassing the need for a separate bootloader.
+The firmware is based on AMI (American Megatrends International) Aptio, and the version for the F4-424 is MADN0101.V04. It offers a wide array of configuration options, but for my purposes, the most interesting features are support for fTPM (Firmware Trusted Platform Module) and the ability to roll in my own secure boot keys.
 
 I used Figma to capture screenshots of the entire UEFI interface (press the play button in the right upper corner for mouse navigation between screens).
 [Figma page](https://www.figma.com/design/1m9lEXdQhvGAz20QHBVGpO/F4-424-Pro-EFI%2FBIOS?node-id=1-75&t=zP4OR0KNAdO7bxBU-1)
