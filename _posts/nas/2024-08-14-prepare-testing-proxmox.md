@@ -84,7 +84,7 @@ update-grub2
 
 
 # Ensure kernel modules are loaded
-nano modules-load.d/iommu-vfio.conf
+nano /etc/modules-load.d/iommu-vfio.conf
 # Add following to the file
 vfio
 vfio_iommu_type1
@@ -121,3 +121,6 @@ dmesg | grep -e DMAR -e IOMMU
 [    0.477001] DMAR: dmar1: Using Queued invalidation
 [    0.479106] DMAR: Intel(R) Virtualization Technology for Directed I/O
 ```
+
+#### Page updates
+29.12.2024 - Add /etc/ in front of modules-load.d

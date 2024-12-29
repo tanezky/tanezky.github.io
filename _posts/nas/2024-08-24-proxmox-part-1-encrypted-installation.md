@@ -268,11 +268,11 @@ After reboot install Proxmox VE packages
 apt install -y proxmox-ve postfix open-iscsi chrony
 ```
 ![First SSH Connection](/assets/img/posts/pve-part1-installation/pve-part1-installation09.jpg){: width="1278" height="930" .center}
-_For Postfix Configuration I chose No configuration since I don't have a mail server._
+_For Postfix Configuration I chose Local only since I don't have a mail server (yet)._
 
 
 #### Cleanup
-Remove Debian kernel, unnecessary packages, update grub and remove subscription repository
+After reboot, remove Debian kernel, unnecessary packages, update grub and remove subscription repository
 
 ```shell
 # Remove kernel and unnecessary packages
@@ -347,3 +347,6 @@ Installation is complete, it's time to start using the new setup.
 Go to admin web-interface <https://10.42.42.150:8006>
 
 Use your `root` credentials and **Realm:** Linux PAM standard authentication
+
+#### Page updates
+29.12.2024 - Update Postfix Configuration, add reboot instruction to cleanup.
