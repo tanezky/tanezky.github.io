@@ -38,7 +38,7 @@ Secure Boot is a security standard that ensures each component loaded during the
 
 As discovered in my article [Terramaster F4-424 Pro UEFI](https://tanezky.github.io/posts/terramaster-uefi/#secure-boot-vulnerability), the device's UEFI suffers from a vulnerability where the installed Platform Key (PK) is a default AMI key. I intend to replace these default keys with my own custom-generated ones.
 
-o complete the chain of trust, the Linux kernel itself must be signed. I'll achieve this by creating a Unified Kernel Image (UKI), which bundles the kernel, initrd, and boot parameters into a single UEFI-compatible executable. Major advantage of this approach is that the UEFI firmware can launch the kernel directly, removing the need for a separate bootloader (GRUB) and simplifying the boot process.
+To complete the chain of trust, the Linux kernel itself must be signed. I'll achieve this by creating a Unified Kernel Image (UKI), which bundles the kernel, initrd, and boot parameters into a single UEFI-compatible executable. Major advantage of this approach is that the UEFI firmware can launch the kernel directly, removing the need for a separate bootloader (GRUB) and simplifying the boot process.
 
 **Status:** WIP
 
@@ -61,9 +61,9 @@ This customized setup deviates significantly from a standard Proxmox configurati
 The pipeline should fetch latest Proxmox kernel [source(https://github.com/proxmox/pve-kernel)], build an unified kernel image and sign it with my custom keys, run basic smoke tests in a virtual environment before deploying the new kernel.
 
 
-# Dev environment
+# Dev Environment
 
-My development environment consists of the Terramaster F4-424 Pro on my desk, connected to a dedicated VLAN on my home network. 
+My development environment consists of the Terramaster F4-424 Pro on my desk, connected to a dedicated VLAN on my home network. I have the Samsung FIT USB stick connected to the onboard USB port. To speed up development I will not connect storage HDDs before stage 4, the device's post-procedure during boot takes considerably long time.
 
 The device is controlled via:
 - A USB hub for peripherals.
