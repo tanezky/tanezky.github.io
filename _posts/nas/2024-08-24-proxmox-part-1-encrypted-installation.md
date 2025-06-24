@@ -15,7 +15,7 @@ image: /assets/img/posts/pve-part1-installation/pve-part1-installation-post.jpg
 
 ## Motivation
 
-If not already familiar with the goals, get familiar with the article Proxmox Part 0 - Secure Architecture
+If not already familiar with the goals, get familiar with the article [Proxmox Part 0 - Project Specification](https://tanezky.github.io/posts/proxmox-part-0-project-specification/)
 
 This article will mostly follow the official Proxmox [tutorial](https://pve.proxmox.com/wiki/Install_Proxmox_VE_on_Debian_12_Bookworm) on installing Proxmox on a fresh Debian 12.11 installation. Main difference being Debian configured with encryption.
 
