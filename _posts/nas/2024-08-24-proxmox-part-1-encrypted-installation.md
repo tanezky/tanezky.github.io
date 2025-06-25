@@ -7,7 +7,7 @@ author: tanezky
 
 categories: [NAS]
 tags: [NAS,Terramaster,F4-424 Pro, Proxmox, SSH, LUKS]
-image: /assets/img/posts/pve-part1-installation/pve-part1-installation-post.jpg
+image: /assets/img/posts/pve-part1-installation/pve-part1-installation01.jpg
 ---
 
 > This post has been rewritten in Jun 2025
@@ -20,12 +20,13 @@ If not already familiar with the goals, get familiar with the article [Proxmox P
 This article will mostly follow the official Proxmox [tutorial](https://pve.proxmox.com/wiki/Install_Proxmox_VE_on_Debian_12_Bookworm) on installing Proxmox on a fresh Debian 12.11 installation. Main difference being Debian configured with encryption.
 
 ## Installing Debian
-![Debian Install](/assets/img/posts/pve-part1-installation/pve-part1-installation01.jpg){: width="1920" height="1080" .center}
+
+### Prerequisites
 1. [Download](https://www.debian.org/distrib/netinst) the Debian amd64 small installation image and flash it onto a USB thumb drive.
 2. Boot your system from the USB drive and begin the installation process.
 3. When the "Installation Menu" appears, **interrupt the process!**
 
-
+### Start Debian install with DHCP disabled
 ![Debian installer](/assets/img/posts/pve-part1-installation/pve-part1-installation02.jpg){: width="1920" height="1080" .center}
 
 By default, the Debian installer attempts to use IP autoconfiguration and DHCP to obtain an IP address. We need to force it to use manual configuration instead.
@@ -34,57 +35,54 @@ By default, the Debian installer attempts to use IP autoconfiguration and DHCP t
 - Add `netcfg/disable_autoconfig=true` to the linux boot command line.
 - Press `F10` to continue booting.
 
+### Network Configuration
 ![Debian installer network](/assets/img/posts/pve-part1-installation/pve-part1-installation03.jpg){: width="1920" height="1080" .center}
 
 Follow the installation process, choosing your preferred settings until you reach the Network Configuration step. Here, configure your network interface with a static IP address, netmask, gateway, and DNS server address. I use Cloudflare DNS `1.1.1.1` on my installations for improved performance.
 
-![Debian installer partitioning](/assets/img/posts/pve-part1-installation/pve-part1-installation04.jpg){: width="1920" height="1080" .center}
+### Partitioning
+
+{% include embed/youtube.html id='GoHzsR_SFzw' %}
+
 
 Proceed with the installation until you reach the **Partition Disks** section. Select the **Manual** partitioning method.
 
-Delete all existing partitions on the disk intended for Proxmox installation. If you encounter errors related to existing LVM configurations, navigate to **Configure the Logical Volume Manager** and delete the volumes and groups.
+I've created a video to show how the configuration is done
 
-The boot partition will not be encrypted, otherwise UEFI would not be able to execute the boot process. This is okay since we are not going to store any sensitive data on the partition.
-
+#### Manual instructions
 Create the following partitions:
 
 - EFI Partition: 512 MB
     - **Use as:** EFI System Partition.
-- Boot Partition: 2 GB
-    - **Use as:** ext4
-    - **Format the partition:** yes,format it
-    - **Mount point:** `/boot`
-    - **Mount options:** `noatime`
 - Encrypted Volume: 480 GB
     - **Use as:** physical volume for encryption
     - **Erase data:** no (this disk has never had anything sensitive on it)
-
-Use the screenshot above as an example before configuring the encryption
-
-
-![Debian installer encryption](/assets/img/posts/pve-part1-installation/pve-part1-installation05.jpg){: width="1920" height="1080" .center}
+- Boot Partition: use rest of the disk
+    - **Use as:** ext4
+    - **Format the partition:** yes,format it
+    - **Mount point:** `/boot`
+    - **NOTE:** In later parts of the Project we'll remove the boot partition.
 
 Enter the "Configure encrypted volumes" section.
 
 1. Check "Yes" to write changes to disk.
 2. Choose "Create encrypted volumes."
-3. Select the crypto device.
+3. Select the crypto partition.
 4. On next screen, select "Finish."
 5. Enter and confirm a strong encryption password.
-
-![Debian installer finalisation](/assets/img/posts/pve-part1-installation/pve-part1-installation06.jpg){: width="1920" height="1080" .center}
 
 Once the encrypted volume appears in the "Partition Disks" view, modify it:
 
 - **Use as:** ext4
 - **Mount point:** `/`
-- **Mount options:** `noatime`
 
 Finally:
 
 - "Finish partitioning and write changes to disk."
 - Choose "no" when asked about configuring swap.
 - Choose "yes" to write the changes to the disk.
+
+### Software selection
 
 ![Debian installer software](/assets/img/posts/pve-part1-installation/pve-part1-installation07.jpg){: width="1920" height="1080" .center}
 
@@ -94,6 +92,7 @@ Once installation is complete, reboot the system and remove installation media.
 
 ### Getting error "cryptsetup: Waiting for encrypted source device"
 ![cryptsetup: Waiting for encrypted source device error](/assets/img/posts/pve-part1-installation/pve-part1-cryptsetup_error.jpg)
+
 This error appears when reinstalling the system without formatting drives, the bootloader tries to run the configuration from previous installation. As a workaround, either enter to the `Advanced options for Debian GNU/Linux` from GRUB menu and choose other kernel or, alternatively reinstall the system and ensure EFI and boot partitions are formatted during installation.
 
 ## Configuring SSH for first connection
@@ -123,8 +122,7 @@ fdisk /dev/sdb
 mkfs.ext4 /dev/sdb3
 
 # 4. Create a mount point and mount the partition
-mkdir -p /mnt/usb
-mount /dev/sdb3 /mnt/usb
+mount -m /dev/sdb3 /mnt/usb
 
 # 5. Navigate to the mounted drive
 cd /mnt/usb
@@ -133,18 +131,17 @@ cd /mnt/usb
 dd if=/dev/urandom of=pvekey.img bs=1M count=50
 
 # 7. Create LUKS volume within the empty file
-cryptsetup --verify-passphrase luksFormat pvekey.img
+cryptsetup luksFormat pvekey.img
 
 # 8. Open the LUKS volume and confirm it is visible in the system
-cryptsetup open --type luks pvekey.img keyvault
+cryptsetup open pvekey.img keyvault
 ls /dev/mapper
 
 # 9. Create filesystem labeled as keyvault
 mkfs.ext4 -L keyvault /dev/mapper/keyvault
 
 # 10. Create mount point for the keyvault, mount it and navigate to the mounted folder
-mkdir -p /media/keyvault
-mount /dev/mapper/keyvault /media/keyvault
+mount -m /dev/mapper/keyvault /media/keyvault
 cd /media/keyvault
 
 # 11. Retrieve and save the host key fingerprint
@@ -154,13 +151,13 @@ ssh-keygen -l -f /etc/ssh/ssh_host_ed25519_key >> host_fingerprint.txt
 ssh-keygen -t ed25519 -f pve_key
 
 # 13. Create the SSH configuration folder for the non-admin user
-mkdir /home/netzky/.ssh
+mkdir /home/tanetzky/.ssh
 
 # 14. Add the public key to the user's authorized_keys file
-cat pve_key.pub >> /home/netzky/.ssh/authorized_keys
+cat pve_key.pub >> /home/tanetzky/.ssh/authorized_keys
 
 # 15. Give the user permissions to .ssh folder and files
-chown -R netzky:netzky /home/netzky/.ssh/
+chown -R tanetzky:tanetzky /home/tanetzky/.ssh/
 
 # 16. Finally, exit the folder and unmount drive.
 cd /
@@ -170,27 +167,28 @@ umount /mnt/usb
 ```
 
 ### First SSH Connection
-![First SSH Connection](/assets/img/posts/pve-part1-installation/pve-part1-installation08.jpg){: width="821" height="582" .center}
+![First SSH Connection](/assets/img/posts/pve-part1-installation/pve-part1-installation08.jpg){: width="826" height="583" .center}
 
 Connect the USB drive to your PC and move `pvekey.img` on your hard drive.
 
-On my Gnome Desktop I can mount the filevault via double clicking the file.
+On my Gnome Desktop I can mount the .img files via double clicking the file.
 After entering the password it is mounted.
 
-How-to in shell:
+#### Mount pvekey container in shell:
 
 ```shell
 # 1. Open the LUKS container
 sudo cryptsetup open --type luks pvekey.img keyvault
 
-# 2. If not existing, create location for the mount point
-sudo mkdir -p /media/keyvault
+# 2. Mount
+sudo mount -m /dev/mapper/keyvault /media/keyvault
 
-# 3. Mount
-sudo mount /dev/mapper/keyvault /media/keyvault
+# 3. Take ownership of keyvault files
+sudo chown -R netzky:netzky /media/keyvault/
+
 ```
 
-Finally, connect to the device with SSH
+#### Connect via SSH
 
 ```bash
 # 1. Navigate to the mounted location or open a new terminal in that folder
@@ -203,25 +201,23 @@ lost+found  vault-fingerprint.txt  pve_key  pve_key.pub
 
 # 3. Print contents of vault-fingerprint.txt
 cat vault-fingerprint.txt
-256 SHA256:wXkuNcQt/8W7N2ivAwJctaYq5mVncEmIrj574mfyYto root@pve-vault (ED25519)
+256 SHA256:5MrLeyQjuJCnThax3XKusvq6t7XvtSwiniEf/rJdYCQ root@pve-vault (ED25519)
 
 # 4. Create SSH connection using pve_key
-ssh -i pve_key netzky@10.42.42.150
+ssh tanezky@10.42.42.150 -i pve_key
 The authenticity of host '10.42.42.150 (10.42.42.150)' can't be established.'
-ED25519 key fingerprint is SHA256:wXkuNcQt/8W7N2ivAwJctaYq5mVncEmIrj574mfyYto.
+ED25519 key fingerprint is HA256:5MrLeyQjuJCnThax3XKusvq6t7XvtSwiniEf/rJdYCQ.
 This key is not known by any other names.
 
 # 5. Copy paste the SHA256 fingerprint from step 3
-Are you sure you want to continue connecting (yes/no/[fingerprint])? SHA256:wXkuNcQt/8W7N2ivAwJctaYq5mVncEmIrj574mfyYto
+Are you sure you want to continue connecting (yes/no/[fingerprint])? SHA256:5MrLeyQjuJCnThax3XKusvq6t7XvtSwiniEf/rJdYCQ
 Warning: Permanently added '10.42.42.150' (ED25519) to the list of known hosts.
 
 # 6. Enter password for the pve_key
 Enter passphrase for key 'pve_key': 
 
 # 7. Login complete
-Linux pve-vault 6.1.0-37-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.99-1 (2024-07-15) x86_64
-
-The programs included with the Debian GNU/Linux system are free software;
+Linux pve-vault 6.1.0-37-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.140-1 (2025-05-22) x86_64
 ...
 ```
 #### Make SSH easier
@@ -229,7 +225,7 @@ Typing the full ssh command with the key file every time can get tedious. To str
 
 ```shell
 # First, copy the private key in your .ssh folder
-cp pve_key /home/netzky/.ssh/
+cp pve_key pve_key.pub /home/netzky/.ssh/
 
 # Edit the local SSH config file on your PC
 ~/.ssh/config
@@ -237,7 +233,7 @@ cp pve_key /home/netzky/.ssh/
 # Add following content with your details
 Host    pve-vault
         HostName 10.42.42.150
-        User netzky
+        User tanezky
         IdentityFile ~/.ssh/pve_key
         LogLevel INFO
         Compression yes
@@ -324,7 +320,7 @@ After reboot, remove Debian kernel, unnecessary packages, update grub and remove
 # Remove kernel and unnecessary packages
 apt remove -y linux-image-amd64 'linux-image-6.1*' os-prober
 
-# Update grub and check its config
+# Update grub and its config
 update-grub
 
 # Remove pve-enterprise.list (don't remove unless you have subscription)
@@ -345,11 +341,13 @@ apt-mark showmanual > manually_installed_after_proxmox.txt
 diff -u file_before file_after
 ```
 
+##### Add network bridge
 Last thing on the list is to add network bridge, for time being I'm going to use default configuration.
 
 More information on Proxmox Network configuration on their [wiki](https://pve.proxmox.com/wiki/Network_Configuration#_default_configuration_using_a_bridge) page.
 
 ```shell
+#
 # Change /etc/network/interfaces from this:
 ....
 
@@ -368,7 +366,7 @@ iface enp2s0 inet static
 iface enp1s0 inet manual
 
 
-
+#
 # To look something like this:
 ...
 
@@ -377,8 +375,13 @@ source /etc/network/interfaces.d/*
 auto lo
 iface lo inet loopback
 
+# Main network interface on Terramaster F4-424 Pro (upper)
 iface enp2s0 inet manual
 
+# Second network interface on Terramaster F4-424 Pro (lower)
+iface enp1s0 inet manual
+
+# Bridge configuration
 auto vmbr0
 iface vmbr0 inet static
     address 10.42.42.150/24
@@ -386,15 +389,11 @@ iface vmbr0 inet static
     bridge-ports enp2s0
     bridge-stp off
     bridge-fd 0
-# dns-* options are implemented by the resolvconf package, if installed
-
-iface enp1s0 inet manual
 
 
-
-# Reboot the system after the bridge configuration is created
+#
+# After saving. reboot the system
 systemctl reboot
-
 ```
 
 ## Admin Web-interface
@@ -408,4 +407,4 @@ Use your `root` credentials and **Realm:** Linux PAM standard authentication
 
 #### Page updates
 - 29.12.2024 - Update Postfix Configuration, add reboot instruction to cleanup.
-- 23.06.2025 - Whole post was reviewed and updated
+- 25.06.2025 - Whole post was reviewed and updated
