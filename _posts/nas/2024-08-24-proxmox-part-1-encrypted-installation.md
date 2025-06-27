@@ -57,7 +57,7 @@ Create the following partitions:
 - Encrypted Volume: 480 GB
     - **Use as:** physical volume for encryption
     - **Erase data:** no (this disk has never had anything sensitive on it)
-- Boot Partition: use rest of the disk
+- Boot Partition: use rest of the disk or set it to for example 2GB
     - **Use as:** ext4
     - **Format the partition:** yes,format it
     - **Mount point:** `/boot`
@@ -101,6 +101,8 @@ It's more convenient to continue the installation from a remote machine, and SSH
 
 While it's unlikely my network has any malicious actors waiting to exploit my devices, I try to prioritize security best practices whenever possible.
 
+
+### Create and mount Encrypted volume
 Following steps instructs on creating encrypted vault on an USB stick to store SSH-keys.
 
 Log in as root on the Debian machine:
@@ -143,23 +145,29 @@ mkfs.ext4 -L keyvault /dev/mapper/keyvault
 # 10. Create mount point for the keyvault, mount it and navigate to the mounted folder
 mount -m /dev/mapper/keyvault /media/keyvault
 cd /media/keyvault
+```
 
-# 11. Retrieve and save the host key fingerprint
+### Generate and enroll SSH keys
+
+On the encrypted volume
+```shell
+
+# Retrieve and save the host key fingerprint
 ssh-keygen -l -f /etc/ssh/ssh_host_ed25519_key >> host_fingerprint.txt
 
-# 12. Generate SSH keys (Use a strong password)
+# Generate SSH keys (Use a strong password)
 ssh-keygen -t ed25519 -f pve_key
 
-# 13. Create the SSH configuration folder for the non-admin user
+# Create the SSH configuration folder for the non-admin user
 mkdir /home/tanetzky/.ssh
 
-# 14. Add the public key to the user's authorized_keys file
+# Add the public key to the user's authorized_keys file
 cat pve_key.pub >> /home/tanetzky/.ssh/authorized_keys
 
-# 15. Give the user permissions to .ssh folder and files
+# Give the user permissions to .ssh folder and files
 chown -R tanetzky:tanetzky /home/tanetzky/.ssh/
 
-# 16. Finally, exit the folder and unmount drive.
+# Finally, exit the folder and unmount drive.
 cd /
 umount /media/keyvault
 cryptsetup close keyvault
