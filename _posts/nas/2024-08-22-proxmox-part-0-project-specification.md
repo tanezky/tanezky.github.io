@@ -40,15 +40,19 @@ As discovered in my article [Terramaster F4-424 Pro UEFI](https://tanezky.github
 
 To complete the chain of trust, the Linux kernel itself must be signed. I'll achieve this by creating a Unified Kernel Image (UKI), which bundles the kernel, initrd, and boot parameters into a single UEFI-compatible executable. Major advantage of this approach is that the UEFI firmware can launch the kernel directly, removing the need for a separate bootloader (GRUB) and simplifying the boot process.
 
-**Status:** WIP
+**Status:** Complete
+
+Link: [Proxmox Part 2 - Secure Boot & UKI](https://tanezky.github.io/posts/proxmox-part-2-secureboot-uki/)
 
 ## 3. Unlock encrypted hard drives during boot
 
 Manually entering a decryption password on every reboot is impractical for a server. The goal here is to leverage the motherboard's Trusted Platform Module (TPM) to automatically unseal the encryption keys and unlock the drive at boot.
 
+**Status:** WIP
+
 ## 4. Create encrypted ZFS pools for data & unlock during boot
 
-After the base system is secured, the next step is to create encrypted ZFS storage pools for data. These pools must also be configured to unlock automatically on boot, likely using the same TPM-based approach as in third goal.
+After the base system is secured, the next step is to create encrypted ZFS storage pools for data. These pools must also be configured to unlock automatically on boot, likely using the same TPM-based approach as in previous goal.
 
 ## 5. Security hardening and system configurations
 
@@ -56,14 +60,14 @@ Once the foundational setup is complete, the final phase will be to harden the d
 
 ## 6. Experimenting on maintenance pipelines
 
-This customized setup deviates significantly from a standard Proxmox configuration, which can create a maintenance challenge. To minimize this burden, especially for kernel updates, I plan to build an automated pipeline.
+This customized setup deviates significantly from a standard Proxmox configuration, which can create a maintenance challenge. To minimize this burden, especially for kernel updates, I plan to build an automated pipeline unless I come up some alternative approach.
 
-The pipeline should fetch latest Proxmox kernel [source(https://github.com/proxmox/pve-kernel)], build an unified kernel image and sign it with my custom keys, run basic smoke tests in a virtual environment before deploying the new kernel.
+The pipeline should fetch latest Proxmox kernel [source](https://github.com/proxmox/pve-kernel), build an unified kernel image and sign it with my custom keys, run basic smoke tests in a virtual environment before deploying the new kernel.
 
 
 # Dev Environment
 
-My development environment consists of the Terramaster F4-424 Pro on my desk, connected to a dedicated VLAN on my home network. I have the Samsung FIT USB stick connected to the onboard USB port. To speed up development I will not connect storage HDDs before stage 4, the device's post-procedure during boot takes considerably long time.
+My development environment consists of the Terramaster F4-424 Pro on my desk, connected to a dedicated VLAN on my home network. I have the Samsung FIT USB stick connected to the onboard USB port. To speed up development I will not connect storage HDDs before stage 4, the device's POST procedure during boot takes a considerably long time.
 
 The device is controlled via:
 - A USB hub for peripherals.
