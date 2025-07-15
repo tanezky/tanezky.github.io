@@ -4,21 +4,78 @@ author: tanezky
 date: 2024-08-16 20:00:00 +/-TTTT
 description: Testing ASM1061 passthrough on Terramaster F4-424 Pro
 categories: [NAS Project, Reviewing Terramaster F4-424 Pro]
-tags: [NAS,Terramaster,F4-424 Pro, Proxmox, Truenas, Virtualization]
+tags: [NAS,Terramaster F4-424 Pro, Proxmox, TrueNAS]
 image: /assets/img/posts/pve-asm-pt/pve-asm-pt-post.jpg
 ---
 
-> **tl;dr: ASM1061 did not work with hardware passthrough**.
->
-> **2025 Update:** Decided to revisit this with new tricks and the ASM1061 passthrough still doesn't work.
+> **2025 Update:** Decided to revisit this with new tricks.
 {: .prompt-info }
 
-## Just for Fun: Truenas on Proxmox
-While running TrueNAS on top of Proxmox might not make any sense, it's an interesting experiment to explore hard disk passthrough and see how well TrueNAS recognizes the virtualized hardware. Plus, it offers a chance to test if the ASMedia ASM1061 controller on the TerraMaster F4-424 Pro plays nicely with passthrough.
 
-## Preparation
+
+
+### Diagnosing Issues
+
+> tl;dr ASM1061 did not work with hardware passthrough
+
+After trying various passthrough techniques in Proxmox, the ASMedia ASM1061 controller refused to work in a virtual machine. While the passthrough was configured correctly on the host, the guest VM would fail to initialize the card, presenting an `unknown header type 7f` error. Further investigation was done which uncovered hardware and firmware faults in both the card and the host system.
+
+#### Motherboard BIOS Errors
+
+The dmesg output was filled with messages like this:
+
+```shell
+Error (bug): Could not resolve symbol [\_SB.PC00.TXHC.RHUB.SS01], AE_NOT_FOUND
+Error (bug): Could not resolve symbol [\_SB.UBTC.RUCC], AE_NOT_FOUND
+```
+
+These ACPI (Advanced Configuration and Power Interface) errors indicate that the motherboard's BIOS/UEFI is providing a faulty or incomplete description of the hardware to the operating system. Since reliable power management and system-wide stability are critical for virtualization, a buggy BIOS can create an unstable foundation for passthrough. The only way to fix these errors is for Terramaster to provide a BIOS update with the necessary ACPI fixes..
+
+> `DMI: retsamarret 000-F4424Pro-CN36-2000/M-ADLN01, BIOS MADN0101.V04 12/22/2023`
+
+**Note** BIOS errors were already present when trying out Terramaster's [TOS 5.1.145](/posts/terramaster-os/#inspecting-dmesg).
+
+#### Function-Level Reset (FLR)
+
+For a stable PCI passthrough the hypervisor (Proxmox/VFIO) must be able to reset a device before handing it to a virtual machine. This ensures the hardware is in a clean state every time the VM starts or reboots.
+
+The most reliable and preferred method is Function-Level Reset (FLR). An `lspci -vvv` command on the host revealed the chip's limitation:
+
+```shell
+Capabilities: [80] Express (v2) Legacy Endpoint, MSI 00
+  DevCap: MaxPayload 512 bytes, PhantFunc 0, Latency L0s <1us, L1 <8us
+  ExtTag- AttnBtn- AttnInd- PwrInd- RBE+ FLReset-
+```
+
+The `FLReset-` flag confirms this chip does not support the modern standard for PCI resets, which is a major red flag for passthrough.
+
+#### Investigating Other Reset Mechanisms
+
+Without FLR the system relies on traditional methods like Power Management (pm) and Bus (bus) resets. While the host reported these methods were available, experiments showed the chip couldn't handle them correctly.
+
+Further investigation into the chip's power management revealed more signs of instability. When its driver was unbound on the host, the chip occassionally reported its power state as `unknown` instead of a standard state like D0 (On) or D3 (Sleep).
+```shell
+# cat /sys/bus/pci/devices/0000:03:00.0/power_state
+unknown
+```
+
+This indicates the chip's firmware doesn't correctly communicate with the kernel's power management system.
+
+#### Conclusion
+
+The investigation leads to a clear verdict: the ASMedia ASM1061 controller on Terramaster F4-424 Pro is fundamentally incompatible with VFIO passthrough due to hardware and firmware limitations.
+
+The failure is caused by a combinations of two factors
+
+1. The motherboard's BIOS contains numerous ACPI errors, this creates an unstable foundation for virtualization.
+2. The ASM1061 chip itself does not support FLR and has a faulty power management implementation, making it unable to handle the mandatory resets required by the hypervisor.
+
+If disk passthrough is required, the integrated Intel SATA controller (00:17.0) for HDD bays 1 and 2 is viable option. The ASMedia controlled bays 3 and 4 should not be used for this purpose.
+
+## Environment Preparation
 
 ### Installing TrueNAS
+
 #### Getting ISO
 ![Get TrueNAS ISO](/assets/img/posts/pve-asm-pt/pve-asm-pt01.jpg){: width="1307" height="574" .center}
 
@@ -169,7 +226,7 @@ Verify disks are visible in TrueNAS under `Storage --> Disks`.
 
 Poweroff the VM and move on to add and test next PCI device.
 
-## Tested Techniques (2025 Update)
+## Tested Techniques
 
 I tested following methods without connecting HDDs, every time the ASM1061 crashed, the system required reboot to get the controller back into working state. The boot process on Terramaster F4-424 Pro takes considerably longer when disks are connected.
 
@@ -260,42 +317,20 @@ hexdump -n 512 -C asm1061.rom
 ### Testing different options with /etc/pve/qemu-server/100.conf
 
 ```shell
-# Test 1: No effect
+# No effect
 hostpci0: 0000:03:00.0,pcie=1
+# No effect
 hostpci0: 0000:03:00.0,pcie=1,rombar=0 
+# No effect
 hostpci0: 0000:03:00.0,pcie=1,rombar=0,sub-device-id=0x0612,sub-vendor-id=0x1b21 
-
-# Test 2: No effect (copied ROM to  /usr/share/kvm/)
+# No effect (copied ROM to  /usr/share/kvm/)
 hostpci0: 0000:03:00.0,pcie=1,rombar=0,romfile=asm1061.rom
-
-# Test 3: Qemu refused to start VM
+# VM refused to start
 hostpci0: 0000:03:00.0,pcie=1,x-vga=on
 
 # Outcome of tests was observed reading dmesg on VM, in all cases the result was the same
 [    0.436960] pci 0000:01:00.0: [1b21:0612] type 7f class 0xffffff conventional PCI
 [    0.437097] pci 0000:01:00.0: unknown header type 7f, ignoring device
-
-
-# Test 4: Passthrough the whole PCI-E bridge
-# Get PCI Device tree
-lspci -t
--[0000:00]-+-00.0
-           +-02.0
-           +-14.0
-           +-14.2
-           +-16.0
-           +-17.0
-           +-1c.0-[01]----00.0
-           +-1c.3-[02]----00.0
-           +-1c.6-[03]----00.0 <-- ASMedia controller (03:00.0) is at 1c.6
-           +-1d.0-[04]----00.0
-           +-1f.0
-           +-1f.3
-           +-1f.4
-           \-1f.5
-
-# Qemu conf line, VM refused to start
-hostpci0: 00:1c.6,pcie=1
 ```
 
 ### Inspecting lspci
@@ -361,8 +396,6 @@ lspci -nnvv
 	Kernel modules: ahci
 
 
-
-
 # ASM1061 after trying to start VM
 03:00.0 SATA controller: ASMedia Technology Inc. ASM1062 Serial ATA Controller (rev 02) (prog-if 01 [AHCI 1.0])
 	Subsystem: ASMedia Technology Inc. ASM1061/ASM1062 Serial ATA Controller
@@ -381,15 +414,12 @@ lspci -nnvv
 ```
 `DevCap: ... FLReset-` shows that ASM1061 on Terramaster F4-424 Pro doesn't support Function Level Reset (FLR). Without this capability the hypervisor cannot properly reset the ASMedia controller.
 
-## From previous test run (2024)
 
-## Troubleshooting ASM1061
+### Journalctl messages when trying to start VM with Disks connected
+
 ![Troubleshooting](/assets/img/posts/pve-asm-pt/pve-asm-pt06.jpg){: width="1205" height="701" .center}
-Unfortunately when I attempted to repeat the Add PCI Device steps for the ASM1061 controller (at address `03:00.0`) it failed to work.
 
-After trying various troubleshooting techniques I concluded that the ASM1061 seems to crash when the virtual machine tries to utilize it. Simultaneously the PCI bridge at address `00:1c.6` reports a "broken device, retraining non-functional downstream link at 2.5GT/s" error.
-
-### Journalctl messages when trying to start VM
+The ASM1061 seems to crash when the virtual machine tries to utilize it. Simultaneously the PCI bridge (at address `00:1c.6`), where ASM1061 is connected, reports a "broken device, retraining non-functional downstream link at 2.5GT/s" error.
 
 ```shell
 [  986.073584] pcieport 0000:00:1c.6: broken device, retraining non-functional downstream link at 2.5GT/s
@@ -417,32 +447,15 @@ After trying various troubleshooting techniques I concluded that the ASM1061 see
 [ 1132.147053] vfio-pci 0000:03:00.0: Unable to change power state from D0 to D3hot, device inaccessible
 ```
 
-### Configurations and useful commands
+### Kernel CMD Configurations
 ![GRUB](/assets/img/posts/pve-asm-pt/pve-asm-pt07.jpg){: width="1205" height="701" .center}
 _Kernel parameters_
 
 ```shell
-# Different kernel parameters which were tried
+# IOMMU is actually enabled by default since Proxmox kernels 6.8 
 GRUB_CMDLINE_LINUX="intel_iommu=on"
+# Passthrough
 GRUB_CMDLINE_LINUX="intel_iommu=on iommu=pt"
+# Disable 
 GRUB_CMDLINE_LINUX="intel_iommu=on iommu=pt, pcie_aspm=off"
-
-# Get device vendor and model
-lspci -nn
-03:00.0 SATA controller [0106]: ASMedia Technology Inc. ASM1062 Serial ATA Controller [1b21:0612] (rev 02)
-
-# Part 1: Force asm1061 to use vfio-pci driver, blacklist ahci
-cat /etc/modprobe.d/pve-blacklist.conf 
-blacklist ahci
-
-# Part 2: Instruct kernel to use vfio-pci driver for asm1061
-cat /etc/modprobe.d/vfio.conf 
-options vfio-pci ids=1b21:0612
-
-# Query which kernel module and driver device is using
-lspci -k -d 1b21:0612
-03:00.0 SATA controller: ASMedia Technology Inc. ASM1062 Serial ATA Controller (rev 02)
-        Subsystem: ASMedia Technology Inc. ASM1061/ASM1062 Serial ATA Controller
-        Kernel driver in use: vfio-pci
-        Kernel modules: ahci
 ```
