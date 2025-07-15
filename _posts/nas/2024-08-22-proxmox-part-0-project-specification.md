@@ -1,12 +1,12 @@
 ---
 title: Proxmox Part 0 - Project Specification
-description: Planning the Proxmox project
+description: Planning the Encrypted Proxmox Installation project
 
 date: 2024-08-22 20:00:00 +/-TTTT
 author: tanezky
 
-categories: [NAS]
-tags: [NAS,Terramaster,F4-424 Pro, Proxmox, Project]
+categories: [NAS Project, Encrypted Proxmox Installation]
+tags: [NAS,Terramaster F4-424 Pro, Proxmox Project, TPM, LUKS, ZFS]
 image: /assets/img/posts/pve-part0/pve-part0-environment.jpg
 ---
 
@@ -30,29 +30,33 @@ I will follow this [guide](https://pve.proxmox.com/wiki/Install_Proxmox_VE_on_De
 
 **Status:** Complete
 
-Link: [Proxmox Part 1 - Encrypted Installation](https://tanezky.github.io/posts/proxmox-part-1-encrypted-installation/)
+Link: [Proxmox Part 1 - Encrypted Installation](/posts/proxmox-part-1-encrypted-installation/)
 
 ## 2. Configure Secureboot
 
 Secure Boot is a security standard that ensures each component loaded during the boot process is digitally signed and trusted.
 
-As discovered in my article [Terramaster F4-424 Pro UEFI](https://tanezky.github.io/posts/terramaster-uefi/#secure-boot-vulnerability), the device's UEFI suffers from a vulnerability where the installed Platform Key (PK) is a default AMI key. I intend to replace these default keys with my own custom-generated ones.
+As discovered in my article [Terramaster F4-424 Pro UEFI](/posts/terramaster-uefi/#secure-boot-vulnerability), the device's UEFI suffers from a vulnerability where the installed Platform Key (PK) is a default AMI key. I intend to replace these default keys with my own custom-generated ones.
 
 To complete the chain of trust, the Linux kernel itself must be signed. I'll achieve this by creating a Unified Kernel Image (UKI), which bundles the kernel, initrd, and boot parameters into a single UEFI-compatible executable. Major advantage of this approach is that the UEFI firmware can launch the kernel directly, removing the need for a separate bootloader (GRUB) and simplifying the boot process.
 
 **Status:** Complete
 
-Link: [Proxmox Part 2 - Secure Boot & UKI](https://tanezky.github.io/posts/proxmox-part-2-secureboot-uki/)
+Link: [Proxmox Part 2 - Secure Boot & UKI](/posts/proxmox-part-2-secureboot-uki/)
 
 ## 3. Unlock encrypted hard drives during boot
 
 Manually entering a decryption password on every reboot is impractical for a server. The goal here is to leverage the motherboard's Trusted Platform Module (TPM) to automatically unseal the encryption keys and unlock the drive at boot.
 
-**Status:** WIP
+**Status:** Complete
+
+Link: [Proxmox Part 3 - TPM 2.0 & Root LUKS](/posts/proxmox-part-3-tpm-luks/)
 
 ## 4. Create encrypted ZFS pools for data & unlock during boot
 
 After the base system is secured, the next step is to create encrypted ZFS storage pools for data. These pools must also be configured to unlock automatically on boot, likely using the same TPM-based approach as in previous goal.
+
+**Status:** WIP
 
 ## 5. Security hardening and system configurations
 
