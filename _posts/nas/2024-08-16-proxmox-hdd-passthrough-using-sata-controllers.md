@@ -18,7 +18,7 @@ image: /assets/img/posts/pve-asm-pt/pve-asm-pt-post.jpg
 
 > tl;dr ASM1061 did not work with hardware passthrough
 
-After trying various passthrough techniques in Proxmox, the ASMedia ASM1061 controller refused to work in a virtual machine. While the passthrough was configured correctly on the host, the guest VM would fail to initialize the card, presenting an `unknown header type 7f` error. Further investigation was done which uncovered hardware and firmware faults in both the card and the host system.
+After trying various passthrough techniques in Proxmox, the ASMedia ASM1061 controller refused to work in a virtual machine. While the passthrough was configured correctly on the host, the guest VM would fail to initialize the chip, presenting an `unknown header type 7f` error. Further investigation was done which uncovered hardware and firmware faults in both the chip and the host system.
 
 #### Motherboard BIOS Errors
 
@@ -30,6 +30,8 @@ Error (bug): Could not resolve symbol [\_SB.UBTC.RUCC], AE_NOT_FOUND
 ```
 
 These ACPI (Advanced Configuration and Power Interface) errors indicate that the motherboard's BIOS/UEFI is providing a faulty or incomplete description of the hardware to the operating system. Since reliable power management and system-wide stability are critical for virtualization, a buggy BIOS can create an unstable foundation for passthrough. The only way to fix these errors is for Terramaster to provide a BIOS update with the necessary ACPI fixes..
+
+BIOS version
 
 > `DMI: retsamarret 000-F4424Pro-CN36-2000/M-ADLN01, BIOS MADN0101.V04 12/22/2023`
 
@@ -129,81 +131,82 @@ The installation should start.
 Find out addresses for SATA controllers (00:17.0 and 03:00.0).
 On Terramaster F4-424 Pro there are two controllers, Intel (HDD bays 1,2) and ASM1061 (HDD bays 3,4).
 ```shell
-lspci -k
-00:00.0 Host bridge: Intel Corporation Device 4617
-        DeviceName: Onboard - Other
-        Subsystem: Intel Corporation Device 7270
-        Kernel driver in use: igen6_edac
-        Kernel modules: igen6_edac
-00:02.0 VGA compatible controller: Intel Corporation Alder Lake-N [UHD Graphics]
-        DeviceName: Onboard - Video
-        Subsystem: Intel Corporation Alder Lake-N [UHD Graphics]
-        Kernel driver in use: i915
-        Kernel modules: i915, xe
-00:14.0 USB controller: Intel Corporation Alder Lake-N PCH USB 3.2 xHCI Host Controller
-        DeviceName: Onboard - Other
-        Subsystem: Intel Corporation Alder Lake-N PCH USB 3.2 xHCI Host Controller
-        Kernel driver in use: xhci_hcd
-        Kernel modules: xhci_pci
-00:14.2 RAM memory: Intel Corporation Alder Lake-N PCH Shared SRAM
-        DeviceName: Onboard - Other
-        Subsystem: Intel Corporation Alder Lake-N PCH Shared SRAM
-00:16.0 Communication controller: Intel Corporation Alder Lake-N PCH HECI Controller
-        DeviceName: Onboard - Other
-        Subsystem: Intel Corporation Alder Lake-N PCH HECI Controller
-        Kernel driver in use: mei_me
-        Kernel modules: mei_me
-00:17.0 SATA controller: Intel Corporation Device 54d3
-        DeviceName: Onboard - SATA
-        Subsystem: Intel Corporation Device 7270
-        Kernel driver in use: ahci
-        Kernel modules: ahci
-00:1c.0 PCI bridge: Intel Corporation Device 54ba
-        Subsystem: Intel Corporation Device 7270
-        Kernel driver in use: pcieport
-00:1c.3 PCI bridge: Intel Corporation Device 54bb
-        Subsystem: Intel Corporation Device 7270
-        Kernel driver in use: pcieport
-00:1c.6 PCI bridge: Intel Corporation Device 54be
-        Subsystem: Intel Corporation Device 7270
-        Kernel driver in use: pcieport
-00:1d.0 PCI bridge: Intel Corporation Device 54b0
-        Subsystem: Intel Corporation Device 7270
-        Kernel driver in use: pcieport
-00:1f.0 ISA bridge: Intel Corporation Alder Lake-N PCH eSPI Controller
-        DeviceName: Onboard - Other
-        Subsystem: Intel Corporation Alder Lake-N PCH eSPI Controller
-00:1f.3 Audio device: Intel Corporation Alder Lake-N PCH High Definition Audio Controller
-        DeviceName: Onboard - Sound
-        Subsystem: Intel Corporation Alder Lake-N PCH High Definition Audio Controller
-        Kernel driver in use: snd_hda_intel
-        Kernel modules: snd_hda_intel, snd_sof_pci_intel_tgl
-00:1f.4 SMBus: Intel Corporation Device 54a3
-        DeviceName: Onboard - Other
-        Subsystem: Intel Corporation Device 7270
-        Kernel driver in use: i801_smbus
-        Kernel modules: i2c_i801
-00:1f.5 Serial bus controller: Intel Corporation Device 54a4
-        DeviceName: Onboard - Other
-        Subsystem: Intel Corporation Device 7270
-        Kernel driver in use: intel-spi
-        Kernel modules: spi_intel_pci
-01:00.0 Ethernet controller: Realtek Semiconductor Co., Ltd. RTL8125 2.5GbE Controller (rev 05)
-        Subsystem: Realtek Semiconductor Co., Ltd. RTL8125 2.5GbE Controller
-        Kernel driver in use: r8169
-        Kernel modules: r8169
-02:00.0 Ethernet controller: Realtek Semiconductor Co., Ltd. RTL8125 2.5GbE Controller (rev 05)
-        Subsystem: Realtek Semiconductor Co., Ltd. RTL8125 2.5GbE Controller
-        Kernel driver in use: r8169
-        Kernel modules: r8169
-03:00.0 SATA controller: ASMedia Technology Inc. ASM1062 Serial ATA Controller (rev 02)
-        Subsystem: ASMedia Technology Inc. ASM1061/ASM1062 Serial ATA Controller
-        Kernel driver in use: ahci
-        Kernel modules: ahci
-04:00.0 Non-Volatile memory controller: Samsung Electronics Co Ltd NVMe SSD Controller 980
-        Subsystem: Samsung Electronics Co Ltd NVMe SSD Controller 980 (DRAM-less)
-        Kernel driver in use: nvme
-        Kernel modules: nvme
+lspci -knn
+00:00.0 Host bridge [0600]: Intel Corporation Device [8086:4617]
+	DeviceName: Onboard - Other
+	Subsystem: Intel Corporation Device [8086:7270]
+	Kernel driver in use: igen6_edac
+	Kernel modules: igen6_edac
+00:02.0 VGA compatible controller [0300]: Intel Corporation Alder Lake-N [UHD Graphics] [8086:46d0]
+	DeviceName: Onboard - Video
+	Subsystem: Intel Corporation Alder Lake-N [UHD Graphics] [8086:7270]
+	Kernel driver in use: i915
+	Kernel modules: i915, xe
+00:14.0 USB controller [0c03]: Intel Corporation Alder Lake-N PCH USB 3.2 xHCI Host Controller [8086:54ed]
+	DeviceName: Onboard - Other
+	Subsystem: Intel Corporation Alder Lake-N PCH USB 3.2 xHCI Host Controller [8086:7270]
+	Kernel driver in use: xhci_hcd
+	Kernel modules: xhci_pci
+00:14.2 RAM memory [0500]: Intel Corporation Alder Lake-N PCH Shared SRAM [8086:54ef]
+	DeviceName: Onboard - Other
+	Subsystem: Intel Corporation Alder Lake-N PCH Shared SRAM [8086:7270]
+00:16.0 Communication controller [0780]: Intel Corporation Alder Lake-N PCH HECI Controller [8086:54e0]
+	DeviceName: Onboard - Other
+	Subsystem: Intel Corporation Alder Lake-N PCH HECI Controller [8086:7270]
+	Kernel driver in use: mei_me
+	Kernel modules: mei_me
+00:17.0 SATA controller [0106]: Intel Corporation Alder Lake-N SATA AHCI Controller [8086:54d3]
+	DeviceName: Onboard - SATA
+	Subsystem: Intel Corporation Alder Lake-N SATA AHCI Controller [8086:7270]
+	Kernel driver in use: ahci
+	Kernel modules: ahci
+00:1c.0 PCI bridge [0604]: Intel Corporation Alder Lake-N PCI Express Root Port [8086:54ba]
+	Subsystem: Intel Corporation Alder Lake-N PCI Express Root Port [8086:7270]
+	Kernel driver in use: pcieport
+00:1c.3 PCI bridge [0604]: Intel Corporation Device [8086:54bb]
+	Subsystem: Intel Corporation Device [8086:7270]
+	Kernel driver in use: pcieport
+00:1c.6 PCI bridge [0604]: Intel Corporation Alder Lake-N PCI Express Root Port [8086:54be]
+	Subsystem: Intel Corporation Alder Lake-N PCI Express Root Port [8086:7270]
+	Kernel driver in use: pcieport
+00:1d.0 PCI bridge [0604]: Intel Corporation Alder Lake-N PCI Express Root Port [8086:54b0]
+	Subsystem: Intel Corporation Alder Lake-N PCI Express Root Port [8086:7270]
+	Kernel driver in use: pcieport
+00:1f.0 ISA bridge [0601]: Intel Corporation Alder Lake-N PCH eSPI Controller [8086:5481]
+	DeviceName: Onboard - Other
+	Subsystem: Intel Corporation Alder Lake-N PCH eSPI Controller [8086:7270]
+00:1f.3 Audio device [0403]: Intel Corporation Alder Lake-N PCH High Definition Audio Controller [8086:54c8]
+	DeviceName: Onboard - Sound
+	Subsystem: Intel Corporation Alder Lake-N PCH High Definition Audio Controller [8086:7270]
+	Kernel driver in use: snd_hda_intel
+	Kernel modules: snd_hda_intel, snd_sof_pci_intel_tgl
+00:1f.4 SMBus [0c05]: Intel Corporation Alder Lake-N SMBus [8086:54a3]
+	DeviceName: Onboard - Other
+	Subsystem: Intel Corporation Alder Lake-N SMBus [8086:7270]
+	Kernel driver in use: i801_smbus
+	Kernel modules: i2c_i801
+00:1f.5 Serial bus controller [0c80]: Intel Corporation Alder Lake-N SPI (flash) Controller [8086:54a4]
+	DeviceName: Onboard - Other
+	Subsystem: Intel Corporation Alder Lake-N SPI (flash) Controller [8086:7270]
+	Kernel driver in use: intel-spi
+	Kernel modules: spi_intel_pci
+01:00.0 Ethernet controller [0200]: Realtek Semiconductor Co., Ltd. RTL8125 2.5GbE Controller [10ec:8125] (rev 05)
+	Subsystem: Realtek Semiconductor Co., Ltd. RTL8125 2.5GbE Controller [10ec:0123]
+	Kernel driver in use: r8169
+	Kernel modules: r8169
+02:00.0 Ethernet controller [0200]: Realtek Semiconductor Co., Ltd. RTL8125 2.5GbE Controller [10ec:8125] (rev 05)
+	Subsystem: Realtek Semiconductor Co., Ltd. RTL8125 2.5GbE Controller [10ec:0123]
+	Kernel driver in use: r8169
+	Kernel modules: r8169
+03:00.0 SATA controller [0106]: ASMedia Technology Inc. ASM1062 Serial ATA Controller [1b21:0612] (rev 02)
+	Subsystem: ASMedia Technology Inc. ASM1061/ASM1062 Serial ATA Controller [1b21:1060]
+	Kernel driver in use: ahci
+	Kernel modules: ahci
+04:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd NVMe SSD Controller 980 [144d:a809]
+	Subsystem: Samsung Electronics Co Ltd NVMe SSD Controller 980 (DRAM-less) [144d:a801]
+	Kernel driver in use: nvme
+	Kernel modules: nvme
+
 ```
 
 #### Add PCI Device to VM
@@ -228,7 +231,7 @@ Poweroff the VM and move on to add and test next PCI device.
 
 ## Tested Techniques
 
-I tested following methods without connecting HDDs, every time the ASM1061 crashed, the system required reboot to get the controller back into working state. The boot process on Terramaster F4-424 Pro takes considerably longer when disks are connected.
+I tested following methods without connecting HDDs, since every time the ASM1061 crashed, the system required reboot to get the controller back into working state. The boot process on Terramaster F4-424 Pro takes considerably longer when disks are connected.
 
 BIOS version
 `DMI: retsamarret 000-F4424Pro-CN36-2000/M-ADLN01, BIOS MADN0101.V04 12/22/2023`
